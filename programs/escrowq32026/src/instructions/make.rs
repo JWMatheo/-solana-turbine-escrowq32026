@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::{Escrow, ESCROW_SEED};
+use crate::{error::ErrorCode, Escrow, ESCROW_SEED};
 use anchor_spl::{
     associated_token::AssociatedToken,
     token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked},
@@ -55,14 +55,16 @@ impl<'info> Make<'info> {
         bumps: &MakeBumps,
         expiration: i64,
     ) -> Result<()> {
+        require!(receive > 0, ErrorCode::InvalidReceiveAmount);
+
         self.escrow.set_inner(Escrow {
             seed,
             maker: self.maker.key(),
             mint_a: self.mint_a.key(),
             mint_b: self.mint_b.key(),
-            receive: receive,
+            receive,
             bump: bumps.escrow,
-            expiration: expiration,
+            expiration,
         });
         Ok(())
     }
